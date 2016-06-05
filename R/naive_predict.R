@@ -1,4 +1,4 @@
-single_predict <- function(rit,instance,radius,absence,compute_counts){
+single_predict <- function(rit,instance){
   class_names <- names(rit[["Class_priors"]])
   nb_class <- length(class_names)
   
@@ -8,49 +8,33 @@ single_predict <- function(rit,instance,radius,absence,compute_counts){
   model <- rit[["Model"]]
   map <- rit[["Map"]]
   
-  count_has <- 0
   for(elem in model){
-    weight <- compute_weight(instance,elem[["interaction"]],map,radius)
+    weight <- compute_weight(instance,elem[["interaction"]],map)
     probs <- probs + weight*log10(elem[["sm"]])
-    if(absence)
-      probs <- probs + (1-weight)*log10(elem[["sm_neg"]])
-    if(weight == 1)
-      count_has <- count_has + 1
   }
   
   # Compute argmax
   response <- names(probs)[which.max(probs)]
-  if(compute_counts){
-    return(list(response=response,count_has=count_has/length(model)))
-  }
-  else{
-    return(response)
-  }
+  response
 }
 
-naive_predict <- function(rit,testset,radius=0,absence=FALSE,compute_counts=FALSE){
-  if(radius < 0)
-    stop("Radius should be positive.")
-  
-  if(compute_counts)
-    response <- vector(mode="list",length=nrow(testset))
-  else
-    response <- vector(mode="character",length=nrow(testset))
+#' @title Classification Rule for Random Intersection Trees with discretization.
+#' @description Applies a basic \code{argmax} rule in order to classify new instances.
+#'
+#' @return A response vector for the \code{testset} instances
+#'
+#' @param rit A model produced by \code{naive_RIT}
+#' @param testset A dataframe containing the instance to classify
+#' 
+#' @references Ballarini Robin. Random intersection trees for genomic data analysis. Master's thesis, Université Catholique de Louvain, 2016.
+#' @export
+#'
+naive_predict <- function(rit,testset){
+  response <- vector(mode="character",length=nrow(testset))
   
   for(i in 1:nrow(testset)){
-    response[[i]] <- single_predict(rit,testset[i,],radius,absence,compute_counts)
+    response[[i]] <- single_predict(rit,testset[i,])
   }
   
-  if(compute_counts){
-    r <- sapply(response,function(i){
-      i[["response"]]
-    })
-    c <- sapply(response,function(i){
-      i[["count_has"]]
-    })
-    return(list(response=r,count_has=sum(c)))
-  }
-  else{
-    return(response)
-  }
+  response
 }

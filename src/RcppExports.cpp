@@ -6,16 +6,15 @@
 using namespace Rcpp;
 
 // compute_weight
-double compute_weight(DataFrame const& instance, IntegerVector const& interaction, List const& map, double radius);
-RcppExport SEXP baseRIT_compute_weight(SEXP instanceSEXP, SEXP interactionSEXP, SEXP mapSEXP, SEXP radiusSEXP) {
+double compute_weight(DataFrame const& instance, IntegerVector const& interaction, List const& map);
+RcppExport SEXP baseRIT_compute_weight(SEXP instanceSEXP, SEXP interactionSEXP, SEXP mapSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
     Rcpp::traits::input_parameter< DataFrame const& >::type instance(instanceSEXP);
     Rcpp::traits::input_parameter< IntegerVector const& >::type interaction(interactionSEXP);
     Rcpp::traits::input_parameter< List const& >::type map(mapSEXP);
-    Rcpp::traits::input_parameter< double >::type radius(radiusSEXP);
-    __result = Rcpp::wrap(compute_weight(instance, interaction, map, radius));
+    __result = Rcpp::wrap(compute_weight(instance, interaction, map));
     return __result;
 END_RCPP
 }

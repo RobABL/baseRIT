@@ -5,8 +5,7 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-double compute_weight(DataFrame const& instance,IntegerVector const& interaction, List const& map,double radius){
-   double dist = 0;
+double compute_weight(DataFrame const& instance,IntegerVector const& interaction, List const& map){
    
    for(int i=0;i<interaction.size();++i){
      
@@ -23,19 +22,10 @@ double compute_weight(DataFrame const& instance,IntegerVector const& interaction
        double lb = value[0];
        double ub = value[1];
        
-       if(instance_value < lb){ // value lower than lower bound
-          if(radius != 0)
-            dist = std::max(((instance_value - lb)*(instance_value - lb))/variance,dist);
-          else
-            return 0;
+       if(instance_value < lb || instance_value > ub){ // value lower than lower bound or higher than higher bound
+          return 0;
        }
-       if(instance_value > ub){ // value higher than higher bound
-          if(radius != 0)
-            dist = std::max(((instance_value - ub)*(instance_value - ub))/variance,dist);
-          else
-            return 0;
-       }
-       // If value is in interval, distance is zero for the current attribute
+       // If value is in interval, continue
      }
      else{ // Categorical attribute
        int instance_value = instance[orig_attr_idx];
@@ -45,11 +35,5 @@ double compute_weight(DataFrame const& instance,IntegerVector const& interaction
      }
    }
    
-   if(radius != 0){
-     double weight = std::exp(-dist/radius);
-     return weight;
-   }
-   else{
-     return 1;
-   }
+   return 1;
 }

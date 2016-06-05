@@ -1,5 +1,10 @@
+#' @useDynLib baseRIT
+#' @import data.table
+#' @import discretization
+#'
+
 # Equal width unsupervised discretization
-equal_width <- function(data,n=nrow(data)^(1/3)){
+equal_width <- function(data,n){
   cutp <- lapply(data,function(attr){
     seq(min(attr),max(attr),length.out=n+1)
   })
@@ -13,7 +18,7 @@ equal_width <- function(data,n=nrow(data)^(1/3)){
   list(cutp=cutp,Disc.data=disc)
 }
 
-naive_preproc <- function(data,classes,algo){
+naive_preproc <- function(data,classes,algo,disc_p){
   # Empty dataframe with same number of rows
   new_data <- data.frame("rows"=1:nrow(data), row.names="rows")
   
@@ -53,16 +58,12 @@ naive_preproc <- function(data,classes,algo){
       cont_data[["Class"]] <- classes
       disc_out <- disc.Topdown(cont_data,method=3) # AMEVA algorithm
     }
-    else if(algo == "chim"){ # chi-merge with level of significance 0.05
+    else if(algo == "chim"){ # chi-merge
       cont_data[["Class"]] <- classes
-      disc_out <- chiM(cont_data,alpha=0.05)
-    }
-    else if(algo == "chim1"){ # chi-merge with level of significance 0.1
-      cont_data[["Class"]] <- classes
-      disc_out <- chiM(cont_data,alpha=0.1)
+      disc_out <- chiM(cont_data,alpha=disc_p)
     }
     else if(algo == "eqwidth"){ # equal-width binning (unsupervised)
-      disc_out <- equal_width(cont_data)
+      disc_out <- equal_width(cont_data,disc_p)
     }
   
     # Add disc continuous attributes
@@ -103,7 +104,31 @@ naive_preproc <- function(data,classes,algo){
   list(data=new_data,map=map)
 }
 
-naive_RIT <- function(data,classes,theta,disc="ameva",branch=3,depth=10L,split_nb=1,n_trees=100L,
+#' @title Random Intersection Trees with discretization.
+#' @description Executes the algorithm known as Random Intersection Trees with discretization.
+#' 
+#' @return A model that is composed of all informative interactions found in the dataset.
+#'
+#' @param data The dataset as a dataframe.
+#' @param classes A response vector for the dataset.
+#' @param theta The prevalence thresholds. Used to determine if an interaction is informative of not w.r.t. the classes.
+#' @param disc The method used to discretize the dataset and transform it into a binary format. Possible values are \code{"ameva"}, \code{"caim"}, \code{"chim"} and \code{"eqwidth"} which correspond to the Ameva, CAIM, ChiMerge and Equal-width binning discretization methods.
+#' @param disc_p This is the parameter passed to the discretization algorithm. If \code{disc} is \code{"chim"}, this is the level of significance. If \code{disc} is \code{"eqwith"}, this is the number of bins. In all other cases, this parameter is ignored.
+#' @param branch The branching factor in the interaction search.
+#' @param depth The depth of the interaction search.
+#' @param split_nb The number of intersections that should be succesively computed before splitting the search into \code{branch} children.
+#' @param n_trees The number of trees.
+#' @param min_inter_sz The minimum allowed size of interactions.
+#' @param L The number of permutations that should be used to estimate the prevalences. If \code{L} is 0, the exact prevalences are computed from \code{data} and \code{classes}.
+#' @param es A logical that indicates whether or not early stopping should be used.
+#' 
+#' @references Ballarini Robin. Random intersection trees for genomic data analysis. Master's thesis, Université Catholique de Louvain, 2016.
+#' @references L. Gonzalez-Abril, F. J. Cuberos, F. Velasco, and J. A. Ortega. Ameva: An autonomous discretization algorithm. Expert Systems with Applications, 36:5327–5332, 2009.
+#' @references L. A. Kurgan and K. J. Cios. Caim discretization algorithm. IEEE Transactions on knowledge and data engineering, 16(2):145–153, February 2004.
+#' @references Kerber Randy. Chimerge: Discretization of numeric attributes. In Proceedings of AAAI-92, 1992.
+#' @export
+#'
+naive_RIT <- function(data,classes,theta,disc="ameva",disc_p,branch=3,depth=10L,split_nb=1,n_trees=100L,
                       min_inter_sz=2L,L=100L,es=TRUE){
   # check parameters
   if(!is.data.frame(data))
@@ -114,10 +139,16 @@ naive_RIT <- function(data,classes,theta,disc="ameva",branch=3,depth=10L,split_n
     stop("Data cannot be empty.")
   if(any(is.na(classes)))
     stop("Response vector cannot contain missing values.")
-  if(!(disc %in% c("caim","ameva","chim","chim1","eqwidth")))
+  if(!(disc %in% c("caim","ameva","chim","eqwidth")))
     stop("Unknown discretization algorithm.")
   if(split_nb < 1)
     stop("split_nb should be at least 1.")
+  
+  # Default values for disc_p
+  if(missing(disc_p) && disc == "chim")
+    disc_p <- 0.05
+  if(missing(disc_p) && disc == "eqwidth")
+    disc_p <- nrow(data)^(1/3)
   
   classes <- factor(classes)
   class_names <- levels(classes)
@@ -137,7 +168,7 @@ naive_RIT <- function(data,classes,theta,disc="ameva",branch=3,depth=10L,split_n
     }
   }
   
-  preproc <- naive_preproc(data,classes,disc)
+  preproc <- naive_preproc(data,classes,disc,disc_p)
   data <- preproc$data
   map <- preproc$map
   
