@@ -24,7 +24,7 @@ single_predict <- function(rit,instance){
 #' @return A response vector for the \code{testset} instances
 #'
 #' @param rit A model produced by \code{naive_RIT}
-#' @param testset A dataframe containing the instance to classify
+#' @param testset A dataframe containing the instances to classify
 #' 
 #' @references Ballarini Robin. Random intersection trees for genomic data analysis. Master's thesis, Université Catholique de Louvain, 2016.
 #' @export

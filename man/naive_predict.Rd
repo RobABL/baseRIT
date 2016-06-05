@@ -9,7 +9,7 @@ naive_predict(rit, testset)
 \arguments{
 \item{rit}{A model produced by \code{naive_RIT}}
 
-\item{testset}{A dataframe containing the instance to classify}
+\item{testset}{A dataframe containing the instances to classify}
 }
 \value{
 A response vector for the \code{testset} instances
