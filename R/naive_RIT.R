@@ -122,7 +122,7 @@ naive_preproc <- function(data,classes,algo,disc_p){
 #' @param L The number of permutations that should be used to estimate the prevalences. If \code{L} is 0, the exact prevalences are computed from \code{data} and \code{classes}.
 #' @param es A logical that indicates whether or not early stopping should be used.
 #' 
-#' @references Ballarini Robin. Random intersection trees for genomic data analysis. Master's thesis, Université Catholique de Louvain, 2016.
+#' @references Ballarini Robin. Random intersection trees for genomic data analysis. Ecole polytechnique de Louvain, Université catholique de Louvain, 2016. Prom. : Dupont, Pierre.
 #' @references L. Gonzalez-Abril, F. J. Cuberos, F. Velasco, and J. A. Ortega. Ameva: An autonomous discretization algorithm. Expert Systems with Applications, 36:5327–5332, 2009.
 #' @references L. A. Kurgan and K. J. Cios. Caim discretization algorithm. IEEE Transactions on knowledge and data engineering, 16(2):145–153, February 2004.
 #' @references Kerber Randy. Chimerge: Discretization of numeric attributes. In Proceedings of AAAI-92, 1992.

@@ -40,7 +40,7 @@ A model that is composed of all informative interactions found in the dataset.
 Executes the algorithm known as Random Intersection Trees with discretization.
 }
 \references{
-Ballarini Robin. Random intersection trees for genomic data analysis. Master's thesis, Université Catholique de Louvain, 2016.
+Ballarini Robin. Random intersection trees for genomic data analysis. Ecole polytechnique de Louvain, Université catholique de Louvain, 2016. Prom. : Dupont, Pierre.
 
 L. Gonzalez-Abril, F. J. Cuberos, F. Velasco, and J. A. Ortega. Ameva: An autonomous discretization algorithm. Expert Systems with Applications, 36:5327–5332, 2009.
 
